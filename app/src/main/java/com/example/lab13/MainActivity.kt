@@ -3,54 +3,34 @@ package com.example.lab13
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOut
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.lab13.ui.theme.LAB13Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             LAB13Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AnimatedVisibilityE()
+                    // AnimatedVisibilityE()
+                    AnimateColorE()
                 }
             }
         }
@@ -71,9 +51,7 @@ fun AnimatedVisibilityE() {
     ) {
         ElevatedButton(
             onClick = { isVisible = !isVisible },
-            modifier = Modifier
-                .padding(8.dp)
-                .wrapContentSize()
+            modifier = Modifier.padding(8.dp)
         ) {
             Text(
                 text = if (isVisible) "Ocultar" else "Mostrar"
@@ -85,9 +63,7 @@ fun AnimatedVisibilityE() {
         AnimatedVisibility(
             visible = isVisible,
             enter = fadeIn(initialAlpha = 0.3f) +
-                    expandVertically(
-                        expandFrom = Alignment.Top
-                    ) +
+                    expandVertically(expandFrom = Alignment.Top) +
                     slideInVertically(),
             exit = fadeOut() +
                     shrinkVertically() +
@@ -99,8 +75,7 @@ fun AnimatedVisibilityE() {
                     .background(
                         color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(16.dp)
-                    )
-                    .padding(16.dp),
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -108,6 +83,62 @@ fun AnimatedVisibilityE() {
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun AnimateColorE() {
+
+    var isBlue by remember { mutableStateOf(true) }
+
+    val blueColor = Color(0xFF2196F3)
+    val greenColor = Color(0xFF4CAF50)
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isBlue) blueColor else greenColor,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        )
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        ElevatedButton(
+            onClick = { isBlue = !isBlue },
+            modifier = Modifier.padding(bottom = 16.dp),
+            colors = ButtonDefaults.elevatedButtonColors(
+                containerColor = if (isBlue) greenColor else blueColor
+            )
+        ) {
+            Text(
+                text = if (isBlue) "Cambiar a Verde" else "Cambiar a Azul",
+                fontSize = 16.sp,
+                modifier = Modifier.padding(8.dp),
+                color = Color.White
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(150.dp)
+                .background(
+                    color = backgroundColor,
+                    shape = RoundedCornerShape(16.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (isBlue) "Azul" else "Verde",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
