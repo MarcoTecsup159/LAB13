@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -30,7 +31,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     // AnimatedVisibilityE()
-                    AnimateColorE()
+                    // AnimateColorE()
+                    AnimateSizeAndPositionE()
                 }
             }
         }
@@ -136,6 +138,65 @@ fun AnimateColorE() {
         ) {
             Text(
                 text = if (isBlue) "Azul" else "Verde",
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+fun AnimateSizeAndPositionE() {
+    var isExpanded by remember { mutableStateOf(false) }
+
+    //animar tamaño
+    val boxSize by animateDpAsState(
+        targetValue = if (isExpanded) 200.dp else 100.dp,
+        animationSpec = tween(durationMillis = 600),
+        label = "boxSizeAnimation"
+    )
+
+    //animar posición
+    val offsetX by animateDpAsState(
+        targetValue = if (isExpanded) 100.dp else 0.dp,
+        animationSpec = tween(durationMillis = 600),
+        label = "offsetXAnimation"
+    )
+    val offsetY by animateDpAsState(
+        targetValue = if (isExpanded) 100.dp else 0.dp,
+        animationSpec = tween(durationMillis = 600),
+        label = "offsetYAnimation"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        ElevatedButton(
+            onClick = { isExpanded = !isExpanded },
+            modifier = Modifier.padding(bottom = 16.dp)
+        ) {
+            Text(
+                text = if (isExpanded) "Reducir y Mover Atrás" else "Expandir y Mover",
+                fontSize = 16.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .size(boxSize)
+                .offset(x = offsetX, y = offsetY)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(16.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Marco",
                 color = Color.White,
                 style = MaterialTheme.typography.bodyLarge
             )
