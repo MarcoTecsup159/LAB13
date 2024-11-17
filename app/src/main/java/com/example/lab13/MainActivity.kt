@@ -32,7 +32,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // AnimatedVisibilityE()
                     // AnimateColorE()
-                    AnimateSizeAndPositionE()
+                    //AnimateSizeAndPositionE()
+                    AnimatedContentE()
                 }
             }
         }
@@ -203,3 +204,68 @@ fun AnimateSizeAndPositionE() {
         }
     }
 }
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun AnimatedContentE() {
+    var currentState by remember { mutableStateOf("Cargando") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ElevatedButton(onClick = { currentState = "Cargando" }) {
+                Text("Cargando")
+            }
+            ElevatedButton(onClick = { currentState = "Contenido" }) {
+                Text("Contenido")
+            }
+            ElevatedButton(onClick = { currentState = "Error" }) {
+                Text("Error")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        //transcion del contenido
+        AnimatedContent(
+            targetState = currentState,
+            transitionSpec = {
+                fadeIn(tween(500)) with fadeOut(tween(500))
+            },
+            label = "contentTransition"
+        ) { targetState ->
+            when (targetState) {
+                "Cargando" -> {
+                    Text(
+                        text = "Cargando...",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                "Contenido" -> {
+                    Text(
+                        text = "¡Contenido cargado con éxito!",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                "Error" -> {
+                    Text(
+                        text = "Ha ocurrido un error. Intenta nuevamente.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                else -> {}
+            }
+        }
+    }
+}
+
