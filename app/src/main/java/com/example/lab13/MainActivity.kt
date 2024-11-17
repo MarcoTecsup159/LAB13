@@ -4,18 +4,30 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.*
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,7 +45,8 @@ class MainActivity : ComponentActivity() {
                     // AnimatedVisibilityE()
                     // AnimateColorE()
                     //AnimateSizeAndPositionE()
-                    AnimatedContentE()
+                    //AnimatedContentE()
+                    AnimationsCombinedScreen()
                 }
             }
         }
@@ -268,4 +281,121 @@ fun AnimatedContentE() {
         }
     }
 }
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun AnimationsCombinedScreen() {
+    var isDarkMode by remember { mutableStateOf(false) }
+    var isBoxExpanded by remember { mutableStateOf(false) }
+    var isButtonVisible by remember { mutableStateOf(true) }
+
+    // Animacion del box
+    val boxSize by animateDpAsState(
+        targetValue = if (isBoxExpanded) 200.dp else 100.dp,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "boxSize"
+    )
+
+    val boxColor by animateColorAsState(
+        targetValue = if (isBoxExpanded)
+            Color(0xFF2196F3) else Color(0xFF4CAF50),
+        animationSpec = tween(durationMillis = 500),
+        label = "boxColor"
+    )
+
+    // rotación para el ícono
+    val infiniteRotation = rememberInfiniteTransition(label = "iconRotation")
+    val iconRotation by infiniteRotation.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(if (isDarkMode) Color(0xFF121212) else Color.White)
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(boxSize)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(boxColor)
+                    .clickable { isBoxExpanded = !isBoxExpanded }
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (isBoxExpanded) "Contraer" else "Expandir",
+                    color = Color.White,
+                    fontSize = if (isBoxExpanded) 18.sp else 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(
+                visible = isButtonVisible,
+                enter = slideInHorizontally() + fadeIn(),
+                exit = slideOutHorizontally() + fadeOut()
+            ) {
+                Button(
+                    onClick = { isButtonVisible = false },
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text("Desaparecer")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Botón para modo claro/oscuro
+            IconButton(
+                onClick = { isDarkMode = !isDarkMode },
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(if (isDarkMode) Color(0xFF303030) else Color(0xFFE0E0E0))
+            ) {
+                Icon(
+                    imageVector = if (isDarkMode) Icons.Default.LightMode else Icons.Default.DarkMode,
+                    contentDescription = "Cambiar tema",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .graphicsLayer {
+                            rotationZ = iconRotation
+                        },
+                    tint = if (isDarkMode) Color.White else Color.Black
+                )
+            }
+
+            TextButton(
+                onClick = {
+                    isButtonVisible = true
+                    isBoxExpanded = false
+                },
+                modifier = Modifier.padding(top = 32.dp)
+            ) {
+                Text(
+                    "Resetear Animaciones",
+                    color = if (isDarkMode) Color.White else Color.Black
+                )
+            }
+        }
+    }
+}
+
 
